@@ -13,6 +13,10 @@ $(document).ready(function(){
       selectOption(3);
     }
   });
+  $('#generate-report').on('click', function(){
+    generateReport();
+  });
+
   function selectOption(optionIndex) {
     // Use the optionIndex to find the corresponding button
     // Assume the buttons have a class '.option' and they are in the same order as the options
@@ -20,17 +24,43 @@ $(document).ready(function(){
     // Trigger a click event on the button
     $button.click();
   }
+
+  function generateReport() {
+    const reportData = `Correct Answers: ${trivia.correct}\n`+`Incorrect Answers: ${trivia.incorrect}\n` + `Unanswered: ${trivia.unanswered}\n` +
+      `Correctly Answered Questions: ${trivia.correctlyAnswered.join(', ')}\n` + `Unanswered Questions: ${trivia.unansweredQuestion.join(', ')}\n` +
+      `Incorrectly Answered Questions: ${trivia.incorrectlyAnswered.join(', ')}`;
+  
+    const blob = new Blob([reportData], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = 'trivia_report.txt';
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    setTimeout(function(){
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
+  }
   
 })
 
 var trivia = {
   // trivia properties
+  correctlyAnswered: [],
+  incorrectlyAnswered: [],
+  unansweredQuestion: [],
   correct: 0,
   incorrect: 0,
   unanswered: 0,
   currentSet: 0,
   timer: 20,
   timerOn: false,
+  questionAnswered: false,
   timerId : '',
   questions: new Array(100).fill('Which image is diffrernt from the other two?'),
   options: new Array(100).fill(['1', '2', '3']),
@@ -89,8 +119,8 @@ var trivia = {
   // method to loop through and display questions and options 
   nextQuestion : function(){
     
-    // set timer to 20 seconds each question
-    trivia.timer = 1;
+    // set timer to 2 seconds each question
+    trivia.timer = 2;
      $('#timer').removeClass('last-seconds');
     $('#timer').text(trivia.timer);
     
@@ -125,6 +155,7 @@ var trivia = {
 
 
     $('#next-question').one('click', function(){
+      trivia.questionAnswered = false;
       // Hide the 'Next Question' button
       trivia.hideNextButton();
       // Go to the next question
@@ -148,7 +179,9 @@ var trivia = {
       trivia.result = false;
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
-      resultId = setTimeout(trivia.showNextButton, 1000);
+      trivia.questionAnswered=true
+      trivia.unansweredQuestion.push(trivia.currentSet);
+      resultId = setTimeout(trivia.showNextButton, 10);
       $('#results').html('<h3>Out of time! ' +'</h3>');
       // $('#results').html('<h3>Out of time! The answer was '+ Object.values(trivia.answers)[trivia.currentSet] +'</h3>');
     }
@@ -176,6 +209,11 @@ var trivia = {
     
     // timer ID for gameResult setTimeout
     var resultId;
+
+    if (trivia.questionAnswered) {
+      return;
+    }
+    trivia.questionAnswered = true;
     
     // the answer to the current question being asked
     var currentAnswer = Object.values(trivia.answers)[trivia.currentSet];
@@ -191,12 +229,14 @@ var trivia = {
       trivia.correct++;
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
+      trivia.correctlyAnswered.push(trivia.currentSet);
       // resultId = setTimeout(trivia.guessResult, 1000);
       // $('#results').html('<h3>Correct Answer!</h3>');
     }
     // else the user picked the wrong option, increment incorrect
     else{
       $(this).addClass('btn-success').removeClass('btn-info');
+      trivia.incorrectlyAnswered.push(trivia.currentSet);
       // $(this).addClass('btn-danger').removeClass('btn-info');
       
       trivia.incorrect++;
