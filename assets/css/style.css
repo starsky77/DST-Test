@@ -1,0 +1,20 @@
+/* body{
+	background-image: url(https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQwlhxs5gueEnbTtnMlcSYCyu1XPgZ76KbjU5QF3oGYn7h3gAY);
+	text-align: center;
+} */
+
+.text-muted{
+	color: rgb(255, 0, 0);
+}
+.last-seconds{
+  color: red;
+}
+.option{
+  margin: 15px;
+}
+.question-image {
+	width: 256px;
+	height: 256px;
+	margin-right: 45px; 
+  }
+  
