@@ -11,8 +11,29 @@ $(document).ready(function(){
       selectOption(2);
     } else if(e.keyCode === 51 || e.keyCode === 99) { // "3" on the main keyboard or numpad
       selectOption(3);
+    }else if(e.keyCode === 32) { // Space bar
+      // Logic for next question
+      triggerNextQuestion();
     }
   });
+  $('#submit-range').on('click', function() {
+    const startRange = parseInt($('#start-range').val(), 10);
+    const endRange = parseInt($('#end-range').val(), 10);
+
+    // Validate input
+    if (isNaN(startRange) || isNaN(endRange) || startRange >= endRange) {
+      alert("Please enter valid numbers for start and end range.");
+      return;
+    }
+    trivia.startImage=startRange
+    trivia.endImage=endRange
+    console.log("startImage:"+trivia.startImage)
+    console.log("endImage:"+trivia.endImage)
+
+    // Optionally, hide the input fields and submit button after submission
+    $('#range-selector').hide();
+  });
+
   $('#generate-report').on('click', function(){
     generateReport();
   });
@@ -25,10 +46,18 @@ $(document).ready(function(){
     $button.click();
   }
 
+  function triggerNextQuestion() {
+    // Your logic to move to the next question.
+    // This might be a call to trivia.guessResult or similar, depending on your code structure.
+    if (trivia.questionAnswered == true) {  // Check if the "Next Question" button exists
+      $('#next-question').click();  // Trigger the click event on the "Next Question" button
+    }
+  }
+  
   function generateReport() {
     const reportData = `Correct Answers: ${trivia.correct}\n`+`Incorrect Answers: ${trivia.incorrect}\n` + `Unanswered: ${trivia.unanswered}\n` +
       `Correctly Answered Questions: ${trivia.correctlyAnswered.join(', ')}\n` + `Unanswered Questions: ${trivia.unansweredQuestion.join(', ')}\n` +
-      `Incorrectly Answered Questions: ${trivia.incorrectlyAnswered.join(', ')}`;
+      `Incorrectly Answered Questions: ${trivia.incorrectlyAnswered.join(', ')}`+`Start Images:${trivia.startImage}\n`+`End Images:${trivia.endImage}\n`;
   
     const blob = new Blob([reportData], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -54,6 +83,8 @@ var trivia = {
   correctlyAnswered: [],
   incorrectlyAnswered: [],
   unansweredQuestion: [],
+  startImage:0,
+  endImage:100,
   correct: 0,
   incorrect: 0,
   unanswered: 0,
@@ -62,10 +93,10 @@ var trivia = {
   timerOn: false,
   questionAnswered: false,
   timerId : '',
-  questions: new Array(100).fill('Which image is diffrernt from the other two?'),
-  options: new Array(100).fill(['1', '2', '3']),
-  answers: new Array(100).fill(''), // This will be filled in later based on the images
-  images: new Array(100).fill([]),
+  questions: new Array(500).fill('Which image is diffrernt from the other two?'),
+  options: new Array(500).fill(['1', '2', '3']),
+  answers: new Array(500).fill(''), // This will be filled in later based on the images
+  images: new Array(500).fill([]),
   // trivia methods
   // method to initialize game
   startGame: function(){
@@ -75,6 +106,7 @@ var trivia = {
     trivia.incorrect = 0;
     trivia.unanswered = 0;
     clearInterval(trivia.timerId);
+    $('#initial-images').hide();
     
     // show game section
     $('#game').show();
@@ -90,11 +122,11 @@ var trivia = {
 
     $('#remaining-time').show();
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < trivia.endImage-trivia.startImage; i++) {
       let images = [];
-      images.push('./assets/images/original/' + (i + 1) + '.JPEG');
-      images.push('./assets/images/set1/' + (i + 1) + '.jpg');
-      images.push('./assets/images/set2/' + (i + 1) + '.jpg');
+      images.push('./assets/images/original/' + (i+1+trivia.startImage) + '.JPEG');
+      images.push('./assets/images/set1/' + (i+1+trivia.startImage) + '.jpg');
+      images.push('./assets/images/set2/' + (i+1+trivia.startImage) + '.jpg');
       // // Randomly shuffle the images for this question
       images.sort(() => Math.random() - 0.5);
       trivia.images[i] = images;
@@ -190,11 +222,7 @@ var trivia = {
       
       // adds results of game (correct, incorrect, unanswered) to the page
       $('#results')
-        .html('<h3>Thank you for playing!</h3>'+
-        '<p>Correct: '+ trivia.correct +'</p>'+
-        '<p>Incorrect: '+ trivia.incorrect +'</p>'+
-        '<p>Unaswered: '+ trivia.unanswered +'</p>'+
-        '<p>Please play again!</p>');
+        .html('<h3>Thank you for playing!</h3>');
       
       // hide game sction
       $('#game').hide();
