@@ -4,6 +4,22 @@ $(document).ready(function(){
   $("#remaining-time").hide();
   $("#start").on('click', trivia.startGame);
   $(document).on('click' , '.option', trivia.guessChecker);
+  $(document).on('keydown', function(e){
+    if(e.keyCode === 49 || e.keyCode === 97) { // "1" on the main keyboard or numpad
+      selectOption(1);
+    } else if(e.keyCode === 50 || e.keyCode === 98) { // "2" on the main keyboard or numpad
+      selectOption(2);
+    } else if(e.keyCode === 51 || e.keyCode === 99) { // "3" on the main keyboard or numpad
+      selectOption(3);
+    }
+  });
+  function selectOption(optionIndex) {
+    // Use the optionIndex to find the corresponding button
+    // Assume the buttons have a class '.option' and they are in the same order as the options
+    var $button = $('.option').eq(optionIndex - 1); // eq is 0-based index
+    // Trigger a click event on the button
+    $button.click();
+  }
   
 })
 
@@ -68,6 +84,8 @@ var trivia = {
     $('#next-question').hide();
   },
 
+  
+
   // method to loop through and display questions and options 
   nextQuestion : function(){
     
@@ -105,13 +123,11 @@ var trivia = {
       $('#images').append($('<img src="'+ path +'" class="question-image">'));
     });
 
-    console.log("Next question "); // Debugging line
 
     $('#next-question').one('click', function(){
       // Hide the 'Next Question' button
       trivia.hideNextButton();
       // Go to the next question
-      console.log("Press the button");
       trivia.guessResult();
     });
     
@@ -133,7 +149,8 @@ var trivia = {
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
       resultId = setTimeout(trivia.showNextButton, 1000);
-      $('#results').html('<h3>Out of time! The answer was '+ Object.values(trivia.answers)[trivia.currentSet] +'</h3>');
+      $('#results').html('<h3>Out of time! ' +'</h3>');
+      // $('#results').html('<h3>Out of time! The answer was '+ Object.values(trivia.answers)[trivia.currentSet] +'</h3>');
     }
     // if all the questions have been shown end the game, show results
     else if(trivia.currentSet === Object.keys(trivia.questions).length){
@@ -175,18 +192,18 @@ var trivia = {
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
       // resultId = setTimeout(trivia.guessResult, 1000);
-      $('#results').html('<h3>Correct Answer!</h3>');
+      // $('#results').html('<h3>Correct Answer!</h3>');
     }
     // else the user picked the wrong option, increment incorrect
     else{
-      // turn button clicked red for incorrect
-      $(this).addClass('btn-danger').removeClass('btn-info');
+      $(this).addClass('btn-success').removeClass('btn-info');
+      // $(this).addClass('btn-danger').removeClass('btn-info');
       
       trivia.incorrect++;
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
       // resultId = setTimeout(trivia.guessResult, 1000);
-      $('#results').html('<h3>Better luck next time! '+ currentAnswer +'</h3>');
+      // $('#results').html('<h3>Better luck next time! '+ currentAnswer +'</h3>');
     }
     trivia.showNextButton();
     
