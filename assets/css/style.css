@@ -15,13 +15,20 @@
 .initial-image {
 	width: 256px;
 	height: 256px;
-	margin: 30px;
-  }
-  
+	margin: 45px;
+}
+#pre-question-images {
+display: none;
+}
+.pre-question-image {
+width: 256px;
+height: 256px;
+margin-right: 45px; 
+}
 .question-image {
 	width: 256px;
 	height: 256px;
 	margin-right: 45px; 
-  }
+}
 
   

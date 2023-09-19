@@ -97,6 +97,7 @@ var trivia = {
   options: new Array(500).fill(['1', '2', '3']),
   answers: new Array(500).fill(''), // This will be filled in later based on the images
   images: new Array(500).fill([]),
+  pre_images: new Array(1),
   // trivia methods
   // method to initialize game
   startGame: function(){
@@ -121,6 +122,10 @@ var trivia = {
     $('#start').hide();
 
     $('#remaining-time').show();
+
+    trivia.pre_images.push('./assets/images/pre/pre_image.jpg');
+    trivia.pre_images.push('./assets/images/pre/pre_image.jpg');
+    trivia.pre_images.push('./assets/images/pre/pre_image.jpg');
 
     for (let i = 0; i < trivia.endImage-trivia.startImage; i++) {
       let images = [];
@@ -151,14 +156,14 @@ var trivia = {
   // method to loop through and display questions and options 
   nextQuestion : function(){
     
-    // set timer to 2 seconds each question
-    trivia.timer = 2;
-     $('#timer').removeClass('last-seconds');
+    // set timer to 1 seconds each question
+    trivia.timer = 25;
+    $('#timer').removeClass('last-seconds');
     $('#timer').text(trivia.timer);
     
     // to prevent timer speed up
     if(!trivia.timerOn){
-      trivia.timerId = setInterval(trivia.timerRunning, 1000);
+      trivia.timerId = setInterval(trivia.timerRunning, 100);
       trivia.timerOn = true;
     }
     
@@ -168,23 +173,19 @@ var trivia = {
     
     // an array of all the user options for the current question
     var questionOptions = Object.values(trivia.options)[trivia.currentSet];
-    
     // creates all the trivia guess options in the html
     $.each(questionOptions, function(index, key){
       $('#options').append($('<button class="option btn btn-info btn-lg">'+key+'</button>'));
     })
-
     // Get all the images for the current question
-    var questionImages = Object.values(trivia.images)[trivia.currentSet];
-    
+    var questionImages = Object.values(trivia.pre_images);
     // Clear existing images
     $('#images').html('');
-    
     // Add each image to the HTML
     $.each(questionImages, function(index, path){
       $('#images').append($('<img src="'+ path +'" class="question-image">'));
     });
-
+    
 
     $('#next-question').one('click', function(){
       trivia.questionAnswered = false;
@@ -198,15 +199,32 @@ var trivia = {
   // method to decrement counter and count unanswered if timer runs out
   timerRunning : function(){
     // if timer still has time left and there are still questions left to ask
-    if(trivia.timer > -1 && trivia.currentSet < Object.keys(trivia.questions).length){
+    if(trivia.timer > 0 && trivia.currentSet < Object.keys(trivia.questions).length){
       $('#timer').text(trivia.timer);
       trivia.timer--;
-        if(trivia.timer === 4){
-          $('#timer').addClass('last-seconds');
-        }
+    }
+    if (trivia.timer === 22){
+      // Get all the images for the current question
+      var questionImages = Object.values(trivia.images)[trivia.currentSet];
+      // Clear existing images
+      $('#images').html('');
+      // Add each image to the HTML
+      $.each(questionImages, function(index, path){
+        $('#images').append($('<img src="'+ path +'" class="question-image">'));
+      });
+    }
+    else if(trivia.timer === 12){
+      // Get all the images for the current question
+      var questionImages = Object.values(trivia.pre_images);
+      // Clear existing images
+      $('#images').html('');
+      // Add each image to the HTML
+      $.each(questionImages, function(index, path){
+        $('#images').append($('<img src="'+ path +'" class="question-image">'));
+      });
     }
     // the time has run out and increment unanswered, run result
-    else if(trivia.timer === -1){
+    else if(trivia.timer === 0){
       trivia.unanswered++;
       trivia.result = false;
       clearInterval(trivia.timerId);
