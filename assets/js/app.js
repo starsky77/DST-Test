@@ -57,7 +57,7 @@ $(document).ready(function(){
   function generateReport() {
     const reportData = `Correct Answers: ${trivia.correct}\n`+`Incorrect Answers: ${trivia.incorrect}\n` + `Unanswered: ${trivia.unanswered}\n` +
       `Correctly Answered Questions: ${trivia.correctlyAnswered.join(', ')}\n` + `Unanswered Questions: ${trivia.unansweredQuestion.join(', ')}\n` +
-      `Incorrectly Answered Questions: ${trivia.incorrectlyAnswered.join(', ')}`+`Start Images:${trivia.startImage}\n`+`End Images:${trivia.endImage}\n`;
+      `Incorrectly Answered Questions: ${trivia.incorrectlyAnswered.join(', ')}\n`+`Start Images:${trivia.startImage}\n`+`End Images:${trivia.endImage}\n`;
   
     const blob = new Blob([reportData], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -212,13 +212,13 @@ var trivia = {
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
       trivia.questionAnswered=true
-      trivia.unansweredQuestion.push(trivia.currentSet);
+      trivia.unansweredQuestion.push(trivia.currentSet+trivia.startImage);
       resultId = setTimeout(trivia.showNextButton, 10);
       $('#results').html('<h3>Out of time! ' +'</h3>');
       // $('#results').html('<h3>Out of time! The answer was '+ Object.values(trivia.answers)[trivia.currentSet] +'</h3>');
     }
     // if all the questions have been shown end the game, show results
-    else if(trivia.currentSet === Object.keys(trivia.questions).length){
+    else if(trivia.currentSet >= trivia.endImage-trivia.startImage){
       
       // adds results of game (correct, incorrect, unanswered) to the page
       $('#results')
@@ -257,14 +257,14 @@ var trivia = {
       trivia.correct++;
       clearInterval(trivia.timerId);
       trivia.timerOn = false;
-      trivia.correctlyAnswered.push(trivia.currentSet);
+      trivia.correctlyAnswered.push(trivia.currentSet+trivia.startImage);
       // resultId = setTimeout(trivia.guessResult, 1000);
       // $('#results').html('<h3>Correct Answer!</h3>');
     }
     // else the user picked the wrong option, increment incorrect
     else{
       $(this).addClass('btn-success').removeClass('btn-info');
-      trivia.incorrectlyAnswered.push(trivia.currentSet);
+      trivia.incorrectlyAnswered.push(trivia.currentSet+trivia.startImage);
       // $(this).addClass('btn-danger').removeClass('btn-info');
       
       trivia.incorrect++;
@@ -281,16 +281,23 @@ var trivia = {
     
     // increment to next question set
     trivia.currentSet++;
-    console.log("Go to next question:"+trivia.currentSet);
-
-    
-    // remove the options and results
-    $('.option').remove();
-    $('#results h3').remove();
-    
-    // begin next question
-    trivia.nextQuestion();
-     
+    if(trivia.currentSet >= trivia.endImage-trivia.startImage){
+      
+      // adds results of game (correct, incorrect, unanswered) to the page
+      $('#results')
+        .html('<h3>Thank you for playing!</h3>');
+      // hide game sction
+      $('#game').hide();
+      // show start button to begin a new game
+      $('.option').remove();
+    }else{
+      console.log("Go to next question:"+trivia.currentSet);
+      // remove the options and results
+      $('.option').remove();
+      $('#results h3').remove();
+      // begin next question
+      trivia.nextQuestion();
+    }
   }
 
 }
