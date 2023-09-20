@@ -35,9 +35,21 @@
         <div id="game">
           <h2>There will be three images shown on the screen, one of them is very different from the other two. </h2>
           <h2>Use 1,2 and 3 on the keyboard to select the one that you think is different from the other two. </h2>
-          <h2>For each set of images, you will have 2 seconds to response.</h2>
-          <h2>After selecting the image or timeout, press space to go into the next question.</h2>
-          <h2>Before starting, you could look at the following example.</h2>
+          <h2>After you start, for each set of the images, they will show right at the place of the masks after 300ms, and would exist for 1000ms, then disappear. After that, you still have 1200ms to select the answer</h2>
+          <h2>You can select during image appearance, or after it disappear, but notice that you only have 2200ms in total to select your answer. After selecting the image or timeout, press space to go into the next question.</h2>
+          <h2>Before starting, you could try a few examples.</h2>
+          <h2>-------------------------------------------------------------------------------------------</h2>
+          <div id="range-selector" class="text-center">
+            <h2>Select the testing images range(should be less than 500 for each test)</h2>
+            <input type="number" id="start-range" placeholder="Enter start image number">
+            <input type="number" id="end-range" placeholder="Enter end image number">
+            <button id="submit-range" class="btn btn-primary">Submit</button>
+          </div>  
+          <div id="user-info" class="text-center">
+            <input type="text" id="user-name" placeholder="Enter the subject name">
+            <input type="text" id="user-id" placeholder="Enter the experiment ID">
+            <button id="submit-user-info" class="btn btn-primary">Submit</button>
+          </div>                
           <h2>-------------------------------------------------------------------------------------------</h2>
           <p id="remaining-time" class="text-muted">Remaining Time: <span id="timer"></span></p>
           <p id="question" class="lead"></p>
@@ -50,21 +62,16 @@
       <div class="row">
         <div id="choices" class="text-center">
           <div id="initial-images" class="text-center">
-            <img src="./assets/images/example/ILSVRC2012_val_00000646.JPEG" alt="Image 1" class="initial-image">
-            <img src="./assets/images/example/ILSVRC2012_val_00000646.jpg" alt="Image 2" class="initial-image">
-            <img src="./assets/images/example/ILSVRC2012_val_00000646_2.jpg" alt="Image 3" class="initial-image">
+            <img src="./assets/images/example/original/1.JPEG" alt="Image 1" class="initial-image">
+            <img src="./assets/images/example/set1/1.jpg" alt="Image 2" class="initial-image">
+            <img src="./assets/images/example/set2/1.jpg" alt="Image 3" class="initial-image">
           </div>
           <!-- <div id="pre-question-images" class="text-center">
             <img src="./assets/images/pre/pre_image.jpg" alt="Pre Image 1" class="pre-question-image">
             <img src="./assets/images/pre/pre_image.jpg" alt="Pre Image 2" class="pre-question-image">
             <img src="./assets/images/pre/pre_image.jpg" alt="Pre Image 3" class="pre-question-image">
           </div>           -->
-          <div id="range-selector" class="text-center">
-            <h2>Select the testing images range(should be less than 500 for each test)</h2>
-            <input type="number" id="start-range" placeholder="Enter start number (a)">
-            <input type="number" id="end-range" placeholder="Enter end number (b)">
-            <button id="submit-range" class="btn btn-primary">Submit</button>
-          </div>                    
+          <button id="start_test" class="btn btn-info btn-lg">Start Test</button>            
           <button id="start" class="btn btn-info btn-lg">Start Game</button>
           <div id="options">
           <button id="next-question" class="btn btn-primary btn-lg" style="display:none;">Next Question</button>
