@@ -104,6 +104,7 @@ var DST = {
   subject_name: '',
   experiment_times:'',
   mode:1,
+  islastFake:0,
   correctlyAnswered: [],
   incorrectlyAnswered: [],
   unansweredQuestion: [],
@@ -121,6 +122,10 @@ var DST = {
   options: new Array(500).fill(['1', '2', '3']),
   answers: new Array(500).fill(''), // This will be filled in later based on the images
   images: new Array(500).fill([]),
+  images_fake: new Array(40).fill([]),
+  questions_fake: new Array(40).fill('Which image is diffrernt from the other two?'),
+  options_fake: new Array(40).fill(['1', '2', '3']),
+  answers_fake: new Array(40).fill(''), 
   pre_images: new Array(1),
   // DST methods
   // method to initialize game
@@ -154,12 +159,17 @@ var DST = {
     DST.pre_images.push('./assets/images/pre/pre_image.jpg');
     DST.pre_images.push('./assets/images/pre/pre_image.jpg');
 
+
     if (DST.mode===0){
       DST.startImage=0
-      DST.endImage=4
-      for (let i = 0; i < 4; i++) {
+      DST.endImage=3
+      for (let i = 0; i < 3; i++) {
         let images = [];
-        images.push('./assets/images/example/original/' + (i+1) + '.JPEG');
+        if (i===1){
+          images.push('./assets/images/example/original/' + (i+1) + '.JPEG');
+        }else{
+          images.push('./assets/images/example/original/' + (i+1) + '.jpg');
+        }
         images.push('./assets/images/example/set1/' + (i+1) + '.jpg');
         images.push('./assets/images/example/set2/' + (i+1) + '.jpg');
         // // Randomly shuffle the images for this question
@@ -181,9 +191,17 @@ var DST = {
         // // Determine the answer based on which image ends with ".JPEG"
         DST.answers[i] = String(images.findIndex(img => img.endsWith('.JPEG')) + 1); // 1-based index for answer
       }
+      for (let i = 0; i < 40; i++){
+        let images = [];
+        images.push('./assets/images/catch_trial/original/' + (i+1) + '.jpg');
+        images.push('./assets/images/catch_trial/set1/' + (i+1) + '.jpg');
+        images.push('./assets/images/catch_trial/set2/' + (i+1) + '.jpg');
+        // // Randomly shuffle the images for this question
+        images.sort(() => Math.random() - 0.5);
+        DST.images_fake[i] = images;
+      }
     }
 
-    
     // ask first question
     DST.nextQuestion();
     
@@ -200,18 +218,19 @@ var DST = {
 
   // method to loop through and display questions and options 
   nextQuestion : function(){
-    
+
     // set timer to 1 seconds each question
-    DST.timer = 25;
+    DST.timer = 23;
     $('#timer').removeClass('last-seconds');
     $('#timer').text(DST.timer);
+
     
     // to prevent timer speed up
     if(!DST.timerOn){
       DST.timerId = setInterval(DST.timerRunning, 100);
       DST.timerOn = true;
     }
-    
+
     // gets all the questions then indexes the current questions
     var questionContent = Object.values(DST.questions)[DST.currentSet];
     $('#question').text(questionContent);
@@ -248,15 +267,26 @@ var DST = {
       $('#timer').text(DST.timer);
       DST.timer--;
     }
-    if (DST.timer === 22){
+    if (DST.timer === 20){
       // Get all the images for the current question
-      var questionImages = Object.values(DST.images)[DST.currentSet];
-      // Clear existing images
-      $('#images').html('');
-      // Add each image to the HTML
-      $.each(questionImages, function(index, path){
-        $('#images').append($('<img src="'+ path +'" class="question-image">'));
-      });
+      if ((DST.currentSet+1) % 20 === 0 && !DST.islastFake){
+        var questionImages = Object.values(DST.images_fake)[Math.floor((DST.currentSet+1)/20)];
+        // Clear existing images
+        $('#images').html('');
+        // Add each image to the HTML
+        $.each(questionImages, function(index, path){
+          $('#images').append($('<img src="'+ path +'" class="question-image">'));
+        });
+      }
+      else{
+        var questionImages = Object.values(DST.images)[DST.currentSet];
+        // Clear existing images
+        $('#images').html('');
+        // Add each image to the HTML
+        $.each(questionImages, function(index, path){
+          $('#images').append($('<img src="'+ path +'" class="question-image">'));
+        });
+      }
     }
     else if(DST.timer === 12){
       // Get all the images for the current question
@@ -306,36 +336,43 @@ var DST = {
     }
     DST.questionAnswered = true;
     
-    // the answer to the current question being asked
-    var currentAnswer = Object.values(DST.answers)[DST.currentSet];
-
-    console.log("Clicked: " + $(this).text()); // Debugging line
-    console.log("Correct answer: " + currentAnswer); // Debugging line
-    
-    // if the text of the option picked matches the answer of the current question, increment correct
-    if($(this).text() === currentAnswer){
-      // turn button green for correct
-      $(this).addClass('btn-success').removeClass('btn-info');
-      
-      DST.correct++;
-      clearInterval(DST.timerId);
+    if ((DST.currentSet+1) % 20 === 0 && !DST.islastFake){
+      console.log("Fake question"); // Debugging line
       DST.timerOn = false;
-      DST.correctlyAnswered.push(DST.currentSet+DST.startImage);
-      // resultId = setTimeout(DST.guessResult, 1000);
-      // $('#results').html('<h3>Correct Answer!</h3>');
+      clearInterval(DST.timerId);
     }
-    // else the user picked the wrong option, increment incorrect
     else{
-      $(this).addClass('btn-success').removeClass('btn-info');
-      DST.incorrectlyAnswered.push(DST.currentSet+DST.startImage);
-      // $(this).addClass('btn-danger').removeClass('btn-info');
+      // the answer to the current question being asked
+      var currentAnswer = Object.values(DST.answers)[DST.currentSet];
+      console.log("Clicked: " + $(this).text()); // Debugging line
+      console.log("Correct answer: " + currentAnswer); // Debugging line
       
-      DST.incorrect++;
-      clearInterval(DST.timerId);
-      DST.timerOn = false;
-      // resultId = setTimeout(DST.guessResult, 1000);
-      // $('#results').html('<h3>Better luck next time! '+ currentAnswer +'</h3>');
+      // if the text of the option picked matches the answer of the current question, increment correct
+      if($(this).text() === currentAnswer){
+        // turn button green for correct
+        $(this).addClass('btn-success').removeClass('btn-info');
+        
+        DST.correct++;
+        clearInterval(DST.timerId);
+        DST.timerOn = false;
+        DST.correctlyAnswered.push(DST.currentSet+DST.startImage);
+        // resultId = setTimeout(DST.guessResult, 1000);
+        // $('#results').html('<h3>Correct Answer!</h3>');
+      }
+      // else the user picked the wrong option, increment incorrect
+      else{
+        $(this).addClass('btn-success').removeClass('btn-info');
+        DST.incorrectlyAnswered.push(DST.currentSet+DST.startImage);
+        // $(this).addClass('btn-danger').removeClass('btn-info');
+        
+        DST.incorrect++;
+        clearInterval(DST.timerId);
+        DST.timerOn = false;
+        // resultId = setTimeout(DST.guessResult, 1000);
+        // $('#results').html('<h3>Better luck next time! '+ currentAnswer +'</h3>');
     }
+    }
+    
     DST.showNextButton();
     
   },
@@ -344,8 +381,15 @@ var DST = {
     
     // increment to next question set
     DST.currentSet++;
+    if ((DST.currentSet) % 20 === 0 && !DST.islastFake){
+      DST.currentSet--;
+      DST.islastFake=1;
+      console.log("Fake question, reduce the count")
+    }
+    else{
+      DST.islastFake=0;
+    }
     if(DST.currentSet >= DST.endImage-DST.startImage){
-      
       // adds results of game (correct, incorrect, unanswered) to the page
     if (DST.mode===0){
       $('#results')
@@ -359,7 +403,8 @@ var DST = {
       $('#game').hide();
       // show start button to begin a new game
       $('.option').remove();
-    }else{
+    }
+    else{
       console.log("Go to next question:"+DST.currentSet);
       // remove the options and results
       $('.option').remove();

@@ -28,7 +28,7 @@ def rename_files_in_folder(folder_path):
         # Increment the counter
         counter += 1
 # Specify the folder path where your images are stored
-folder_path = "C:/Users/39968/Documents/GitHub/Distorted-Shape-Test/assets/images/example/set2"
+folder_path = "C:/Users/39968/Documents/GitHub/Distorted-Shape-Test/assets/images/catch_trial/original"
 
 # Call the function
 rename_files_in_folder(folder_path)
