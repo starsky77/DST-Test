@@ -76,18 +76,24 @@ $(document).ready(function(){
   }
   
   function generateReport() {
-    const reportData = `Subject Name:${DST.subject_name}\n` + `Experiment times: ${DST.experiment_times}\n` +
+    reportData = `Subject Name:${DST.subject_name}\n` + `Experiment times: ${DST.experiment_times}\n` +
      `Correct Answers: ${DST.correct}\n`+`Incorrect Answers: ${DST.incorrect}\n` + `Unanswered: ${DST.unanswered}\n` +
       `Correctly Answered Questions: ${DST.correctlyAnswered.join(', ')}\n` + `Unanswered Questions: ${DST.unansweredQuestion.join(', ')}\n` +
       `Incorrectly Answered Questions: ${DST.incorrectlyAnswered.join(', ')}\n`+`Start Images:${DST.startImage}\n`+`End Images:${DST.endImage}\n`;
   
+    reportData += 'Time taken for each question:\n';
+
+    for (let i = 0; i < timeRecords.length; i++) {
+      reportData += `Question ${i + DST.startImage}: ${timeRecords[i]} ms\n`;
+    }
+    
     const blob = new Blob([reportData], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     
     const a = document.createElement('a');
     a.style.display = 'none';
     a.href = url;
-    a.download = 'DST_report.txt';
+    a.download = `DST_report_${DST.subject_name}_${DST.experiment_times}.txt`;
     
     document.body.appendChild(a);
     a.click();
@@ -99,6 +105,10 @@ $(document).ready(function(){
   }
   
 })
+
+var timeRecords = [];
+var startTime;
+
 var DST = {
   // DST properties
   subject_name: '',
@@ -122,10 +132,10 @@ var DST = {
   options: new Array(500).fill(['1', '2', '3']),
   answers: new Array(500).fill(''), // This will be filled in later based on the images
   images: new Array(500).fill([]),
-  images_fake: new Array(40).fill([]),
-  questions_fake: new Array(40).fill('Which image is diffrernt from the other two?'),
-  options_fake: new Array(40).fill(['1', '2', '3']),
-  answers_fake: new Array(40).fill(''), 
+  images_fake: new Array(250).fill([]),
+  questions_fake: new Array(250).fill('Which image is diffrernt from the other two?'),
+  options_fake: new Array(250).fill(['1', '2', '3']),
+  answers_fake: new Array(250).fill(''), 
   pre_images: new Array(1),
   // DST methods
   // method to initialize game
@@ -191,7 +201,7 @@ var DST = {
         // // Determine the answer based on which image ends with ".JPEG"
         DST.answers[i] = String(images.findIndex(img => img.endsWith('.JPEG')) + 1); // 1-based index for answer
       }
-      for (let i = 0; i < 40; i++){
+      for (let i = 0; i < 210; i++){
         let images = [];
         images.push('./assets/images/catch_trial/original/' + (i+1) + '.jpg');
         images.push('./assets/images/catch_trial/set1/' + (i+1) + '.jpg');
@@ -223,6 +233,7 @@ var DST = {
     DST.timer = 23;
     $('#timer').removeClass('last-seconds');
     $('#timer').text(DST.timer);
+    startTime = new Date().getTime();
 
     
     // to prevent timer speed up
@@ -269,8 +280,8 @@ var DST = {
     }
     if (DST.timer === 20){
       // Get all the images for the current question
-      if ((DST.currentSet+1) % 20 === 0 && !DST.islastFake){
-        var questionImages = Object.values(DST.images_fake)[Math.floor((DST.currentSet+1)/20)];
+      if ((DST.currentSet+DST.startImage+1) % 10 === 0 && !DST.islastFake){
+        var questionImages = Object.values(DST.images_fake)[Math.floor((DST.currentSet+DST.startImage+1)/10)];
         // Clear existing images
         $('#images').html('');
         // Add each image to the HTML
@@ -306,6 +317,9 @@ var DST = {
       DST.timerOn = false;
       DST.questionAnswered=true
       DST.unansweredQuestion.push(DST.currentSet+DST.startImage);
+      const endTime = new Date().getTime();
+      const timeInterval = endTime - startTime;
+      timeRecords.push(timeInterval);
       resultId = setTimeout(DST.showNextButton, 10);
       $('#results').html('<h3>Out of time! ' +'</h3>');
       // $('#results').html('<h3>Out of time! The answer was '+ Object.values(DST.answers)[DST.currentSet] +'</h3>');
@@ -336,10 +350,11 @@ var DST = {
     }
     DST.questionAnswered = true;
     
-    if ((DST.currentSet+1) % 20 === 0 && !DST.islastFake){
+    if ((DST.currentSet+DST.startImage+1) % 10 === 0 && !DST.islastFake){
       console.log("Fake question"); // Debugging line
       DST.timerOn = false;
       clearInterval(DST.timerId);
+      $(this).addClass('btn-success').removeClass('btn-info');
     }
     else{
       // the answer to the current question being asked
@@ -380,14 +395,18 @@ var DST = {
   guessResult : function(){
     
     // increment to next question set
+
     DST.currentSet++;
-    if ((DST.currentSet) % 20 === 0 && !DST.islastFake){
+    if ((DST.currentSet+DST.startImage) % 10 === 0 && !DST.islastFake){
       DST.currentSet--;
       DST.islastFake=1;
       console.log("Fake question, reduce the count")
     }
     else{
       DST.islastFake=0;
+      const endTime = new Date().getTime();
+      const timeInterval = endTime - startTime;
+      timeRecords.push(timeInterval);
     }
     if(DST.currentSet >= DST.endImage-DST.startImage){
       // adds results of game (correct, incorrect, unanswered) to the page
