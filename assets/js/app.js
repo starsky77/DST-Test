@@ -216,6 +216,9 @@ var DST = {
       }
     }
     else{
+      if (DST.endImage-DST.startImage>500){
+        DST.endImage=DST.startImage+500
+      }
       for (let i = 0; i < DST.endImage-DST.startImage; i++) {
         let images = [];
         images.push('./assets/images/original/' + (i+1+DST.startImage) + '.JPEG');
