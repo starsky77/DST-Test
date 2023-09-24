@@ -460,7 +460,7 @@ var DST = {
       // adds results of game (correct, incorrect, unanswered) to the page
     if (DST.mode===0){
       $('#results')
-        .html('<h3>Thank you for playing! Please refresh the page to start the real test.</h3>');
+        .html('<h3>Thank you for playing! Please refresh the page, and click "start game" to start the real test. Remember to select the image range, input your name and many times has this been your experiment into the textbox. </h3>');
     }
     else{
       $('#results')
